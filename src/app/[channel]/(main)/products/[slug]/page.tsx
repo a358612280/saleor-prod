@@ -5,7 +5,10 @@ import { type ResolvingMetadata, type Metadata } from "next";
 import xss from "xss";
 import { invariant } from "ts-invariant";
 import { type WithContext, type Product } from "schema-dts";
+
+import { ExtraOrder } from "./ExtraOrder";
 import { AddButton } from "./AddButton";
+import MediaCarousel from "./MediaCarousel";
 import { VariantSelector } from "@/ui/components/VariantSelector";
 import { ProductImageWrapper } from "@/ui/atoms/ProductImageWrapper";
 import { executeGraphQL } from "@/lib/graphql";
@@ -56,7 +59,7 @@ export async function generateMetadata(
 							alt: product.name,
 						},
 					],
-			  }
+				}
 			: null,
 	};
 }
@@ -88,12 +91,17 @@ export default async function Page({
 		},
 		revalidate: 60,
 	});
+	console.info("product", JSON.stringify(product, null, 2));
 
 	if (!product) {
 		notFound();
 	}
 
 	const firstImage = product.thumbnail;
+	const enableCarousel =
+		product?.metadata.find((item) => item.key === "ui::enable_carousel")?.value == "true";
+	const media = product?.media || [];
+	console.log("media", media);
 	const description = product?.description ? parser.parse(JSON.parse(product?.description)) : null;
 
 	const variants = product.variants;
@@ -132,11 +140,11 @@ export default async function Page({
 	const price = selectedVariant?.pricing?.price?.gross
 		? formatMoney(selectedVariant.pricing.price.gross.amount, selectedVariant.pricing.price.gross.currency)
 		: isAvailable
-		  ? formatMoneyRange({
+			? formatMoneyRange({
 					start: product?.pricing?.priceRange?.start?.gross,
 					stop: product?.pricing?.priceRange?.stop?.gross,
-		    })
-		  : "";
+				})
+			: "";
 
 	const productJsonLd: WithContext<Product> = {
 		"@context": "https://schema.org",
@@ -154,7 +162,7 @@ export default async function Page({
 						priceCurrency: selectedVariant.pricing?.price?.gross.currency,
 						price: selectedVariant.pricing?.price?.gross.amount,
 					},
-			  }
+				}
 			: {
 					name: product.name,
 
@@ -168,7 +176,7 @@ export default async function Page({
 						lowPrice: product.pricing?.priceRange?.start?.gross.amount,
 						highPrice: product.pricing?.priceRange?.stop?.gross.amount,
 					},
-			  }),
+				}),
 	};
 
 	return (
@@ -181,14 +189,18 @@ export default async function Page({
 			/>
 			<form className="grid gap-2 sm:grid-cols-2 lg:grid-cols-8" action={addItem}>
 				<div className="md:col-span-1 lg:col-span-5">
-					{firstImage && (
-						<ProductImageWrapper
-							priority={true}
-							alt={firstImage.alt ?? ""}
-							width={1024}
-							height={1024}
-							src={firstImage.url}
-						/>
+					{!enableCarousel ? (
+						firstImage && (
+							<ProductImageWrapper
+								priority={true}
+								alt={firstImage.alt ?? ""}
+								width={1024}
+								height={1024}
+								src={firstImage.url}
+							/>
+						)
+					) : (
+						<MediaCarousel media={media} />
 					)}
 				</div>
 				<div className="flex flex-col pt-6 sm:col-span-1 sm:px-6 sm:pt-0 lg:col-span-3 lg:pt-16">
@@ -209,6 +221,10 @@ export default async function Page({
 							/>
 						)}
 						<AvailabilityMessage isAvailable={isAvailable} />
+						<div>
+							WIP
+							<ExtraOrder />
+						</div>
 						<div className="mt-8">
 							<AddButton disabled={!selectedVariantID || !selectedVariant?.quantityAvailable} />
 						</div>
