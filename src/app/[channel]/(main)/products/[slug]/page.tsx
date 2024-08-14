@@ -6,8 +6,8 @@ import xss from "xss";
 import { invariant } from "ts-invariant";
 import { type WithContext, type Product } from "schema-dts";
 
-import { ExtraOrder } from "./ExtraOrder";
 import { AddButton } from "./AddButton";
+import GlassesButtonGroup from "./GlassesButtonGroup";
 import MediaCarousel from "./MediaCarousel";
 import { VariantSelector } from "@/ui/components/VariantSelector";
 import { ProductImageWrapper } from "@/ui/atoms/ProductImageWrapper";
@@ -98,8 +98,12 @@ export default async function Page({
 	}
 
 	const firstImage = product.thumbnail;
+	// const enableCarousel =
+	// 	product?.metadata.find((item) => item.key === "ui::enable_carousel")?.value == "true";
 	const enableCarousel =
-		product?.metadata.find((item) => item.key === "ui::enable_carousel")?.value == "true";
+		product?.attributes.find((item) => item.attribute.name == "ui_enable_carousel") || false;
+	const showLensForm =
+		product?.attributes.find((item) => item.attribute.name == "ui_show_lens_form") || false;
 	const media = product?.media || [];
 	console.log("media", media);
 	const description = product?.description ? parser.parse(JSON.parse(product?.description)) : null;
@@ -107,6 +111,7 @@ export default async function Page({
 	const variants = product.variants;
 	const selectedVariantID = searchParams.variant;
 	const selectedVariant = variants?.find(({ id }) => id === selectedVariantID);
+	const selectedVariantIndex = variants?.findIndex(({ id }) => id === selectedVariantID) || 0;
 
 	async function addItem() {
 		"use server";
@@ -187,7 +192,7 @@ export default async function Page({
 					__html: JSON.stringify(productJsonLd),
 				}}
 			/>
-			<form className="grid gap-2 sm:grid-cols-2 lg:grid-cols-8" action={addItem}>
+			<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-8">
 				<div className="md:col-span-1 lg:col-span-5">
 					{!enableCarousel ? (
 						firstImage && (
@@ -200,7 +205,7 @@ export default async function Page({
 							/>
 						)
 					) : (
-						<MediaCarousel media={media} />
+						<MediaCarousel media={media} index={selectedVariantIndex} />
 					)}
 				</div>
 				<div className="flex flex-col pt-6 sm:col-span-1 sm:px-6 sm:pt-0 lg:col-span-3 lg:pt-16">
@@ -221,12 +226,14 @@ export default async function Page({
 							/>
 						)}
 						<AvailabilityMessage isAvailable={isAvailable} />
-						<div>
-							WIP
-							<ExtraOrder />
-						</div>
 						<div className="mt-8">
-							<AddButton disabled={!selectedVariantID || !selectedVariant?.quantityAvailable} />
+							{!showLensForm ? (
+								<form action={addItem}>
+									<AddButton disabled={!selectedVariantID || !selectedVariant?.quantityAvailable} />
+								</form>
+							) : (
+								<GlassesButtonGroup variant={selectedVariant} product={product} channel={params.channel} />
+							)}
 						</div>
 						{description && (
 							<div className="mt-8 space-y-6 text-sm text-neutral-500">
@@ -237,7 +244,7 @@ export default async function Page({
 						)}
 					</div>
 				</div>
-			</form>
+			</div>
 		</section>
 	);
 }

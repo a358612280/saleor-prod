@@ -1,0 +1,11 @@
+# 查询产品类型为 LensType 的信息
+query LensTypeList {
+	productTypes(filter: { search: "LensType" }, first: 1) {
+		edges {
+			node {
+				name
+				id
+			}
+		}
+	}
+}

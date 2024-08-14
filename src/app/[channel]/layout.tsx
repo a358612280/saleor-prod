@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { executeGraphQL } from "@/lib/graphql";
 import { ChannelsListDocument } from "@/gql/graphql";
+import { AuthProvider } from "@/ui/components/AuthProvider";
 
 export const generateStaticParams = async () => {
 	// the `channels` query is protected
@@ -25,5 +26,5 @@ export const generateStaticParams = async () => {
 };
 
 export default function ChannelLayout({ children }: { children: ReactNode }) {
-	return children;
+	return <AuthProvider>{children}</AuthProvider>;
 }
