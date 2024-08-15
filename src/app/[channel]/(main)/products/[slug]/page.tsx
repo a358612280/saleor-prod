@@ -111,7 +111,7 @@ export default async function Page({
 	const variants = product.variants;
 	const selectedVariantID = searchParams.variant;
 	const selectedVariant = variants?.find(({ id }) => id === selectedVariantID);
-	const selectedVariantIndex = variants?.findIndex(({ id }) => id === selectedVariantID) || 0;
+	const selectedVariantMediaId = selectedVariant?.media?.[0].id || null;
 
 	async function addItem() {
 		"use server";
@@ -205,7 +205,7 @@ export default async function Page({
 							/>
 						)
 					) : (
-						<MediaCarousel media={media} index={selectedVariantIndex} />
+						<MediaCarousel media={media} selectedVariantMediaId={selectedVariantMediaId} />
 					)}
 				</div>
 				<div className="flex flex-col pt-6 sm:col-span-1 sm:px-6 sm:pt-0 lg:col-span-3 lg:pt-16">

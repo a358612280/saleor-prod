@@ -6,17 +6,20 @@ import { Pagination } from "swiper/modules";
 import "swiper/swiper-bundle.css";
 import { useEffect, useRef } from "react";
 
-const MyCarousel = ({ media, index = 0 }) => {
+const MyCarousel = ({ media, selectedVariantMediaId }) => {
 	const swiperRef = useRef(null);
 	useEffect(() => {
-		if (swiperRef.current) {
-			// 这里可以访问 Swiper 实例并进行初始化控制
-			const swiperInstance = swiperRef.current.swiper;
-			// console.log(swiperInstance);
-			// 例如，可以设置初始 slide
-			swiperInstance.slideTo(index);
+		if (swiperRef.current && selectedVariantMediaId != null) {
+			const targetIndex = media?.findIndex((item) => item.id === selectedVariantMediaId) || -1;
+			if (targetIndex !== -1) {
+				// 这里可以访问 Swiper 实例并进行初始化控制
+				const swiperInstance = swiperRef.current.swiper;
+				// console.log(swiperInstance);
+				// 例如，可以设置初始 slide
+				swiperInstance.slideTo(targetIndex);
+			}
 		}
-	}, [index]);
+	}, [selectedVariantMediaId]);
 
 	return (
 		<Swiper

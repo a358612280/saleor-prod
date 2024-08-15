@@ -15,6 +15,7 @@ query ProductDetails($slug: String!, $channel: String!) {
 			alt
 		}
 		media {
+			id
 			url
 			alt
 		}
