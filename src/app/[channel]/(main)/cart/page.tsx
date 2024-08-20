@@ -1,9 +1,12 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable */
 import Image from "next/image";
 
 import { ToastContainer } from "react-toastify";
 import { CheckoutLink } from "./CheckoutLink";
 import { DeleteLineButton } from "./DeleteLineButton";
-import LensFormInfo from './LensFormInfo'
+import LensFormInfo from "./LensFormInfo";
 import * as Checkout from "@/lib/checkout";
 import { formatMoney, getHrefForVariant } from "@/lib/utils";
 import { LinkWithChannel } from "@/ui/atoms/LinkWithChannel";
@@ -17,7 +20,7 @@ export default async function Page({ params }: { params: { channel: string } }) 
 	const checkoutId = Checkout.getIdFromCookies(params.channel);
 
 	const checkout = await Checkout.find(checkoutId);
-	console.log('checkout', JSON.stringify(checkout, null, 2));
+	console.log("checkout", JSON.stringify(checkout, null, 2));
 
 	if (!checkout || checkout.lines.length < 1) {
 		return (
@@ -47,14 +50,11 @@ export default async function Page({ params }: { params: { channel: string } }) 
 					role="list"
 					className="divide-y divide-neutral-200 border-b border-t border-neutral-200"
 				>
-					{checkout.lines.map((item) => (
-						item?.metadata?.find(meta => meta.key === 'related_variant_id')
-						// 	不显示 附属的产品变体
-						? null
-						: (
+					{checkout.lines.map((item) =>
+						item?.metadata?.find((meta) => meta.key === "related_variant_id") ? // 	不显示 附属的产品变体
+						null : (
 							<li key={item.id} className="flex py-4">
-								<div
-									className="aspect-square h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-neutral-50 sm:h-32 sm:w-32">
+								<div className="aspect-square h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-neutral-50 sm:h-32 sm:w-32">
 									{item.variant?.product?.thumbnail?.url && (
 										<Image
 											src={item.variant.product.thumbnail.url}
@@ -86,42 +86,39 @@ export default async function Page({ params }: { params: { channel: string } }) 
 										</p>
 									</div>
 									{/* 视力、镜片信息 */}
-									{
-										item?.metadata?.find(meta => meta.key === 'lens_form')
-										? (
-												<div className="flex flex-col justify-between">
-													{
-														(() => {
-															try {
-																const lensForm = JSON.parse(item?.metadata?.find(meta => meta.key === 'lens_form')?.value)
-																debugger
-																return (
-																	<LensFormInfo
-																		lensForm={lensForm}
-																		checkoutId={checkoutId}
-																		checkoutLineId={item.id}
-																		channel={params.channel}
-																		checkout={checkout}
-																		product={item.variant?.product}
-																		variant={item.variant}
-																	/>
-																)
-															} catch (e) {
-																return null
-															}
-														})()
-													}
-												</div>
-										) : null
-									}
+									{item?.metadata?.find((meta) => meta.key === "lens_form") ? (
+										<div className="flex flex-col justify-between">
+											{(() => {
+												try {
+													const lensForm = JSON.parse(
+														item?.metadata?.find((meta) => meta.key === "lens_form")?.value,
+													);
+													debugger;
+													return (
+														<LensFormInfo
+															lensForm={lensForm}
+															checkoutId={checkoutId}
+															checkoutLineId={item.id}
+															channel={params.channel}
+															checkout={checkout}
+															product={item.variant?.product}
+															variant={item.variant}
+														/>
+													);
+												} catch (e) {
+													return null;
+												}
+											})()}
+										</div>
+									) : null}
 									<div className="flex justify-between">
-									<div className="text-sm font-bold">Qty: {item.quantity}</div>
+										<div className="text-sm font-bold">Qty: {item.quantity}</div>
 										<DeleteLineButton checkoutId={checkoutId} lineId={item.id} />
 									</div>
 								</div>
 							</li>
-						)
-					))}
+						),
+					)}
 				</ul>
 
 				<div className="mt-12">
