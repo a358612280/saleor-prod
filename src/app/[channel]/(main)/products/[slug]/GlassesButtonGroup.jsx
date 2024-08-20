@@ -29,9 +29,15 @@ function GlassesButtonGroup({ channel, variant, product, onClickFrameOnly, onAdd
 				Frame Only
 			</button>
 			<GlassesStepFormDialog
-				ref={dialogRef} channel={channel} variant={variant} product={product}
+				ref={dialogRef}
+				channel={channel}
+				variant={variant}
+				product={product}
 				submitText="Add to cart"
-				onSubmit={onAddCartWithLens}
+				onSubmit={async (form) => {
+					await onAddCartWithLens(form);
+					dialogRef.current.close();
+				}}
 			/>
 		</div>
 	);
