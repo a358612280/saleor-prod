@@ -1,0 +1,20 @@
+mutation CheckoutAddMultiLines($id: ID!, $lines: [CheckoutLineInput!]!) {
+	checkoutLinesAdd(id: $id, lines: $lines) {
+		checkout {
+			id
+			lines {
+				id
+				quantity
+				variant {
+					name
+					product {
+						name
+					}
+				}
+			}
+		}
+		errors {
+			message
+		}
+	}
+}

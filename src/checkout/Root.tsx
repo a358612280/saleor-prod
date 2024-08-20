@@ -15,6 +15,7 @@ import { useState } from "react";
 import { alertsContainerProps } from "./hooks/useAlerts/consts";
 import { RootViews } from "./views/RootViews";
 import { PageNotFound } from "@/checkout/views/PageNotFound";
+import GlassesStepFormContainer from "@/app/[channel]/(main)/products/[slug]/GlassesStepFormContainer";
 import "./index.css";
 
 export const Root = ({ saleorApiUrl }: { saleorApiUrl: string }) => {
@@ -39,6 +40,7 @@ export const Root = ({ saleorApiUrl }: { saleorApiUrl: string }) => {
 	return (
 		<UrqlProvider value={urqlClient}>
 			<ToastContainer {...alertsContainerProps} />
+			<GlassesStepFormContainer />
 			<ErrorBoundary FallbackComponent={PageNotFound}>
 				<RootViews />
 			</ErrorBoundary>

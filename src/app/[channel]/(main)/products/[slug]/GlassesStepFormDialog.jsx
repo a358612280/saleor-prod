@@ -158,7 +158,7 @@ const formatVariantPrice = (variant) =>
 		? null
 		: formatMoney(variant.pricing.price.gross.amount, variant.pricing.price.gross.currency);
 
-const GlassesStepFormDialog = forwardRef(({ channel, variant, product }, ref) => {
+const GlassesStepFormDialog = forwardRef(({ channel, variant, product, submitText = "Confirm", onSubmit }, ref) => {
 	const [vis, setVis] = useState(false);
 	const [form, setForm] = useState({
 		0: null,
@@ -229,13 +229,16 @@ const GlassesStepFormDialog = forwardRef(({ channel, variant, product }, ref) =>
 		return formatMoney(amount, currency);
 	}, [variant, form]);
 
-	const open = () => {
+	const open = (form) => {
 		setVis(true);
+		// reset form
+		if (form) {
+			setForm(form)
+		}
 	};
 	const close = () => {
 		setVis(false);
 	};
-
 	useImperativeHandle(ref, () => ({
 		open,
 		close,
@@ -314,10 +317,6 @@ const GlassesStepFormDialog = forwardRef(({ channel, variant, product }, ref) =>
 				break;
 		}
 	};
-	const handleSubmit = () => {
-		alert("TBD");
-	};
-
 	return (
 		<div
 			className={clsx(
@@ -366,9 +365,9 @@ const GlassesStepFormDialog = forwardRef(({ channel, variant, product }, ref) =>
 								hidden: currStep !== 3,
 							},
 						)}
-						onClick={() => handleSubmit()}
+						onClick={() => onSubmit?.(form)}
 					>
-						Add To Cart
+						{submitText}
 					</button>
 				</div>
 			</div>

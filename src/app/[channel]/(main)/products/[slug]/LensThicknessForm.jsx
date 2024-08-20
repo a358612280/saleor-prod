@@ -137,7 +137,7 @@ const useLensThicknessProductListQuery = (options) => {
 };
 const useLensThicknessProductList = (channel) => {
 	const id = useLensThicknessId();
-	console.log("LensThickness id", id);
+	// console.log("LensThickness id", id);
 	const shouldPause = useMemo(() => id == null || channel == null, [id, channel]);
 	const [{ data }] = useLensThicknessProductListQuery({
 		variables: {
@@ -153,7 +153,7 @@ const useLensThicknessProductList = (channel) => {
 
 const LensThicknessForm = ({ channel, visible, value, onChange }) => {
 	const { data } = useLensThicknessProductList(channel);
-	console.log("Thickness data", data);
+	// console.log("Thickness data", data);
 	return (
 		<div
 			className={clsx("flex-1 overflow-y-auto", {

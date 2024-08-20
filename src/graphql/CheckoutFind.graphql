@@ -5,6 +5,10 @@ query CheckoutFind($id: ID!) {
 		lines {
 			id
 			quantity
+			metadata {
+				key
+				value
+			}
 			totalPrice {
 				gross {
 					amount
@@ -12,6 +16,11 @@ query CheckoutFind($id: ID!) {
 				}
 			}
 			variant {
+				media {
+					id
+					url
+					alt
+				}
 				product {
 					id
 					name
@@ -22,6 +31,11 @@ query CheckoutFind($id: ID!) {
 					}
 					category {
 						name
+					}
+					productType {
+#						id
+						name
+#						slug
 					}
 				}
 				pricing {

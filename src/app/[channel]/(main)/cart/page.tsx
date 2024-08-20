@@ -1,9 +1,13 @@
 import Image from "next/image";
+
+import { ToastContainer } from "react-toastify";
 import { CheckoutLink } from "./CheckoutLink";
 import { DeleteLineButton } from "./DeleteLineButton";
+import LensFormInfo from './LensFormInfo'
 import * as Checkout from "@/lib/checkout";
 import { formatMoney, getHrefForVariant } from "@/lib/utils";
 import { LinkWithChannel } from "@/ui/atoms/LinkWithChannel";
+import GlassesStepFormContainer from "@/app/[channel]/(main)/products/[slug]/GlassesStepFormContainer.jsx";
 
 export const metadata = {
 	title: "Shopping Cart · Saleor Storefront example",
@@ -13,6 +17,7 @@ export default async function Page({ params }: { params: { channel: string } }) 
 	const checkoutId = Checkout.getIdFromCookies(params.channel);
 
 	const checkout = await Checkout.find(checkoutId);
+	console.log('checkout', JSON.stringify(checkout, null, 2));
 
 	if (!checkout || checkout.lines.length < 1) {
 		return (
@@ -33,6 +38,8 @@ export default async function Page({ params }: { params: { channel: string } }) 
 
 	return (
 		<section className="mx-auto max-w-7xl p-8">
+			<ToastContainer />
+			<GlassesStepFormContainer />
 			<h1 className="mt-8 text-3xl font-bold text-neutral-900">Your Shopping Cart</h1>
 			<form className="mt-12">
 				<ul
@@ -41,44 +48,79 @@ export default async function Page({ params }: { params: { channel: string } }) 
 					className="divide-y divide-neutral-200 border-b border-t border-neutral-200"
 				>
 					{checkout.lines.map((item) => (
-						<li key={item.id} className="flex py-4">
-							<div className="aspect-square h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-neutral-50 sm:h-32 sm:w-32">
-								{item.variant?.product?.thumbnail?.url && (
-									<Image
-										src={item.variant.product.thumbnail.url}
-										alt={item.variant.product.thumbnail.alt ?? ""}
-										width={200}
-										height={200}
-										className="h-full w-full object-contain object-center"
-									/>
-								)}
-							</div>
-							<div className="relative flex flex-1 flex-col justify-between p-4 py-2">
-								<div className="flex justify-between justify-items-start gap-4">
-									<div>
-										<LinkWithChannel
-											href={getHrefForVariant({
-												productSlug: item.variant.product.slug,
-												variantId: item.variant.id,
-											})}
-										>
-											<h2 className="font-medium text-neutral-700">{item.variant?.product?.name}</h2>
-										</LinkWithChannel>
-										<p className="mt-1 text-sm text-neutral-500">{item.variant?.product?.category?.name}</p>
-										{item.variant.name !== item.variant.id && Boolean(item.variant.name) && (
-											<p className="mt-1 text-sm text-neutral-500">Variant: {item.variant.name}</p>
-										)}
+						item?.metadata?.find(meta => meta.key === 'related_variant_id')
+						// 	不显示 附属的产品变体
+						? null
+						: (
+							<li key={item.id} className="flex py-4">
+								<div
+									className="aspect-square h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-neutral-50 sm:h-32 sm:w-32">
+									{item.variant?.product?.thumbnail?.url && (
+										<Image
+											src={item.variant.product.thumbnail.url}
+											alt={item.variant.product.thumbnail.alt ?? ""}
+											width={200}
+											height={200}
+											className="h-full w-full object-contain object-center"
+										/>
+									)}
+								</div>
+								<div className="relative flex flex-1 flex-col justify-between p-4 py-2">
+									<div className="flex justify-between justify-items-start gap-4">
+										<div>
+											<LinkWithChannel
+												href={getHrefForVariant({
+													productSlug: item.variant.product.slug,
+													variantId: item.variant.id,
+												})}
+											>
+												<h2 className="font-medium text-neutral-700">{item.variant?.product?.name}</h2>
+											</LinkWithChannel>
+											<p className="mt-1 text-sm text-neutral-500">{item.variant?.product?.category?.name}</p>
+											{item.variant.name !== item.variant.id && Boolean(item.variant.name) && (
+												<p className="mt-1 text-sm text-neutral-500">Variant: {item.variant.name}</p>
+											)}
+										</div>
+										<p className="text-right font-semibold text-neutral-900">
+											{formatMoney(item.totalPrice.gross.amount, item.totalPrice.gross.currency)}
+										</p>
 									</div>
-									<p className="text-right font-semibold text-neutral-900">
-										{formatMoney(item.totalPrice.gross.amount, item.totalPrice.gross.currency)}
-									</p>
-								</div>
-								<div className="flex justify-between">
+									{/* 视力、镜片信息 */}
+									{
+										item?.metadata?.find(meta => meta.key === 'lens_form')
+										? (
+												<div className="flex flex-col justify-between">
+													{
+														(() => {
+															try {
+																const lensForm = JSON.parse(item?.metadata?.find(meta => meta.key === 'lens_form')?.value)
+																debugger
+																return (
+																	<LensFormInfo
+																		lensForm={lensForm}
+																		checkoutId={checkoutId}
+																		checkoutLineId={item.id}
+																		channel={params.channel}
+																		checkout={checkout}
+																		product={item.variant?.product}
+																		variant={item.variant}
+																	/>
+																)
+															} catch (e) {
+																return null
+															}
+														})()
+													}
+												</div>
+										) : null
+									}
+									<div className="flex justify-between">
 									<div className="text-sm font-bold">Qty: {item.quantity}</div>
-									<DeleteLineButton checkoutId={checkoutId} lineId={item.id} />
+										<DeleteLineButton checkoutId={checkoutId} lineId={item.id} />
+									</div>
 								</div>
-							</div>
-						</li>
+							</li>
+						)
 					))}
 				</ul>
 

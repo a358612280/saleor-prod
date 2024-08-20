@@ -13,7 +13,12 @@ import { VariantSelector } from "@/ui/components/VariantSelector";
 import { ProductImageWrapper } from "@/ui/atoms/ProductImageWrapper";
 import { executeGraphQL } from "@/lib/graphql";
 import { formatMoney, formatMoneyRange } from "@/lib/utils";
-import { CheckoutAddLineDocument, ProductDetailsDocument, ProductListDocument } from "@/gql/graphql";
+import {
+	CheckoutAddLineDocument,
+	CheckoutAddMultiLinesDocument,
+	ProductDetailsDocument,
+	ProductListDocument,
+} from "@/gql/graphql";
 import * as Checkout from "@/lib/checkout";
 import { AvailabilityMessage } from "@/ui/components/AvailabilityMessage";
 
@@ -91,7 +96,7 @@ export default async function Page({
 		},
 		revalidate: 60,
 	});
-	console.info("product", JSON.stringify(product, null, 2));
+	// console.log("product", product);
 
 	if (!product) {
 		notFound();
@@ -105,7 +110,6 @@ export default async function Page({
 	const showLensForm =
 		product?.attributes.find((item) => item.attribute.name == "ui_show_lens_form") || false;
 	const media = product?.media || [];
-	console.log("media", media);
 	const description = product?.description ? parser.parse(JSON.parse(product?.description)) : null;
 
 	const variants = product.variants;
@@ -136,6 +140,61 @@ export default async function Page({
 			},
 			cache: "no-cache",
 		});
+
+		revalidatePath("/cart");
+	}
+
+	async function addItemWithLensForm(lensForm) {
+		"use server";
+
+		const checkout = await Checkout.findOrCreate({
+			checkoutId: Checkout.getIdFromCookies(params.channel),
+			channel: params.channel,
+		});
+		invariant(checkout, "This should never happen");
+
+		Checkout.saveIdToCookie(params.channel, checkout.id);
+
+		if (!selectedVariantID) {
+			return;
+		}
+
+		// TODO hack code
+		if (lensForm && lensForm["2"]?.variantId && lensForm["3"]?.variantId) {
+			console.log('lensForm', lensForm)
+			const productVariantId = decodeURIComponent(selectedVariantID)
+			let simpleLensForm = {
+				0: lensForm["0"],
+				1: lensForm["1"],
+				2: {
+					variantId: lensForm["2"].variantId,
+					variant: null,
+				},
+				3: {
+					variantId: lensForm["3"].variantId,
+					variant: null,
+				},
+			}
+			const lines = [
+				{ quantity: 1, variantId: productVariantId, metadata: [{ key: 'lens_form', value: JSON.stringify(simpleLensForm) }] },
+				{ quantity: 1, variantId: lensForm["2"]?.variantId, metadata: [{ key: 'related_variant_id', value: productVariantId }] },
+				{ quantity: 1, variantId: lensForm["3"]?.variantId, metadata: [{ key: 'related_variant_id', value: productVariantId }] },
+			]
+			console.log('lines', lines)
+			try {
+				await executeGraphQL(CheckoutAddMultiLinesDocument, {
+					variables: {
+						id: checkout.id,
+						lines
+					},
+					cache: "no-cache",
+				})
+				console.log('add cart success')
+			} catch (e) {
+				throw e
+			}
+
+		}
 
 		revalidatePath("/cart");
 	}
@@ -232,7 +291,11 @@ export default async function Page({
 									<AddButton disabled={!selectedVariantID || !selectedVariant?.quantityAvailable} />
 								</form>
 							) : (
-								<GlassesButtonGroup variant={selectedVariant} product={product} channel={params.channel} />
+								<GlassesButtonGroup
+									variant={selectedVariant} product={product} channel={params.channel}
+									onClickFrameOnly={addItem}
+									onAddCartWithLens={addItemWithLensForm}
+								/>
 							)}
 						</div>
 						{description && (
