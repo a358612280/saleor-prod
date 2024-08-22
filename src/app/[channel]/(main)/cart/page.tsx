@@ -51,8 +51,7 @@ export default async function Page({ params }: { params: { channel: string } }) 
 					className="divide-y divide-neutral-200 border-b border-t border-neutral-200"
 				>
 					{checkout.lines.map((item) =>
-						item?.metadata?.find((meta) => meta.key === "related_variant_id") ? // 	不显示 附属的产品变体
-						null : (
+						item?.metadata?.find((meta) => meta.key === "related_variant_id") ? null : ( // 	不显示 附属的产品变体
 							<li key={item.id} className="flex py-4">
 								<div className="aspect-square h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-neutral-50 sm:h-32 sm:w-32">
 									{item.variant?.product?.thumbnail?.url && (
@@ -93,7 +92,6 @@ export default async function Page({ params }: { params: { channel: string } }) 
 													const lensForm = JSON.parse(
 														item?.metadata?.find((meta) => meta.key === "lens_form")?.value,
 													);
-													debugger;
 													return (
 														<LensFormInfo
 															lensForm={lensForm}

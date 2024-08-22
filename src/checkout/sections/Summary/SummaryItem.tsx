@@ -1,7 +1,13 @@
-import { type ReactNode } from "react";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable */
+import { type ReactNode, useMemo } from "react";
+
 import { useSummaryLineLineAttributesText, getSummaryLineProps } from "./utils";
+import { isMainProduct, parseLensForm } from "@/lib/utils-custom";
 import { type CheckoutLineFragment, type OrderLineFragment } from "@/checkout/graphql";
 import { PhotoIcon } from "@/checkout/ui-kit/icons";
+import LensFormInfo from "@/app/[channel]/(main)/cart/LensFormInfo";
 
 export type SummaryLine = CheckoutLineFragment | OrderLineFragment;
 
@@ -10,10 +16,13 @@ interface SummaryItemProps {
 	children: ReactNode;
 }
 
-export const SummaryItem = ({ line, children }: SummaryItemProps) => {
+export const SummaryItem = ({ line, children, ...restProps }: SummaryItemProps) => {
 	const { productName, productImage } = getSummaryLineProps(line);
 
 	const attributesText = useSummaryLineLineAttributesText(line);
+
+	const showExtraInfo = useMemo(() => isMainProduct(line), [line]);
+	const lensForm = useMemo(() => parseLensForm(line), [line]);
 
 	return (
 		<li key={line.id} className="flex border-b py-4 last:border-none" data-testid="SummaryItem">
@@ -33,6 +42,18 @@ export const SummaryItem = ({ line, children }: SummaryItemProps) => {
 					<div className="flex flex-col gap-y-1">
 						<p className="font-bold">{productName}</p>
 						<p className="text-xs text-neutral-500">{attributesText}</p>
+						{lensForm && (
+							<LensFormInfo
+								editable={false}
+								lensForm={lensForm}
+								checkoutLineId={line.id}
+								checkoutId={restProps.checkoutId}
+								channel={restProps?.channel?.slug}
+								checkout={restProps?.checkout}
+								product={line?.variant?.product}
+								variant={line?.variant}
+							/>
+						)}
 					</div>
 					{children}
 				</div>

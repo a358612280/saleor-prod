@@ -120,13 +120,13 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 	};
 
 	return (
-		<div style={{ minWidth: 600 }}>
+		<div style={{ minWidth: 300 }}>
 			<div className="min-h-[120px] w-full border-collapse rounded border border-gray-300 bg-white text-sm shadow-sm">
 				{/* 第一行 */}
 				<div className="flex h-12 flex-row border-b border-gray-300 bg-[#eef2fb]">
 					<div className="flex-1 border-r border-gray-300"></div>
-					<div className="flex-1 flex items-center justify-center border-r border-gray-300">SPH</div>
-					<div className="flex-1 flex items-center justify-center border-r border-gray-300">CYL</div>
+					<div className="flex flex-1 items-center justify-center border-r border-gray-300">SPH</div>
+					<div className="flex flex-1 items-center justify-center border-r border-gray-300">CYL</div>
 					<div
 						className={clsx("flex  flex-1 items-center justify-center", {
 							["border-r border-gray-300"]: type === "PROGRESSIVE" || readonly,
@@ -134,54 +134,50 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 					>
 						AXIS
 					</div>
-					{(type === "PROGRESSIVE" || readonly) && <div className="flex  flex-1 items-center justify-center">ADD</div>}
+					{(type === "PROGRESSIVE" || readonly) && (
+						<div className="flex  flex-1 items-center justify-center">ADD</div>
+					)}
 				</div>
 				{/* 第二行 */}
 				<div className="flex h-12 flex-row border-b border-gray-300">
-					<div className="flex-1 flex items-center border-r border-gray-300 bg-[#eef2fb]">
+					<div className="flex flex-1 items-center border-r border-gray-300 bg-[#eef2fb]">
 						<span className="ml-2">
 							OD <br />
 							<span className="text-xs text-[#999]">(Right)</span>
 						</span>
 					</div>
-					<div className="flex-1 flex items-center justify-center border-r border-gray-300">
-						{
-							readonly
-								? <span className="text-neutral-500">{value.OD.sph}</span>
-								: (
-									<SelectMenus value={value.OD.sph} onChange={(val) => _onChangeUnit(["OD", "sph"], val)} />
-								)
-						}
+					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+						{readonly ? (
+							<span className="text-neutral-500">{value.OD.sph}</span>
+						) : (
+							<SelectMenus value={value.OD.sph} onChange={(val) => _onChangeUnit(["OD", "sph"], val)} />
+						)}
 					</div>
-					<div className="flex-1 flex items-center justify-center border-r border-gray-300">
-						{
-							readonly
-								? <span className="text-neutral-500">{value.OD.cyl}</span>
-								: (
-									<SelectMenus value={value.OD.cyl} onChange={(val) => _onChangeUnit(["OD", "cyl"], val)} />
-								)
-						}
+					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+						{readonly ? (
+							<span className="text-neutral-500">{value.OD.cyl}</span>
+						) : (
+							<SelectMenus value={value.OD.cyl} onChange={(val) => _onChangeUnit(["OD", "cyl"], val)} />
+						)}
 					</div>
 					<div
-						className={clsx("flex-1 flex items-center justify-center", {
+						className={clsx("flex flex-1 items-center justify-center", {
 							["border-r border-gray-300 bg-[#f7f8fa]"]: type === "PROGRESSIVE" || readonly,
 						})}
 					>
-						{(type === "PROGRESSIVE" || readonly) ? (
+						{type === "PROGRESSIVE" || readonly ? (
 							<span className="text-neutral-400">None</span>
 						) : (
 							<SelectMenus value={value.OD.axis} onChange={(val) => _onChangeUnit(["OD", "axis"], val)} />
 						)}
 					</div>
 					{(type === "PROGRESSIVE" || readonly) && (
-						<div className="flex-1 flex items-center justify-center">
-							{
-								readonly
-									? <span className="text-neutral-500">{value.OD.add}</span>
-									: (
-										<SelectMenus value={value.OD.add} onChange={(val) => _onChangeUnit(["OD", "add"], val)} />
-									)
-							}
+						<div className="flex flex-1 items-center justify-center">
+							{readonly ? (
+								<span className="text-neutral-500">{value.OD.add}</span>
+							) : (
+								<SelectMenus value={value.OD.add} onChange={(val) => _onChangeUnit(["OD", "add"], val)} />
+							)}
 						</div>
 					)}
 				</div>
@@ -194,29 +190,25 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						</span>
 					</div>
 					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
-						{
-							readonly
-							? <span className="text-neutral-500">{value.OS.sph}</span>
-							: (
-								<SelectMenus value={value.OS.sph} onChange={(val) => _onChangeUnit(["OS", "sph"], val)} />
-							)
-						}
+						{readonly ? (
+							<span className="text-neutral-500">{value.OS.sph}</span>
+						) : (
+							<SelectMenus value={value.OS.sph} onChange={(val) => _onChangeUnit(["OS", "sph"], val)} />
+						)}
 					</div>
 					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
-						{
-							readonly
-								? <span className="text-neutral-500">{value.OS.cyl}</span>
-								: (
-									<SelectMenus value={value.OS.cyl} onChange={(val) => _onChangeUnit(["OS", "cyl"], val)} />
-								)
-						}
+						{readonly ? (
+							<span className="text-neutral-500">{value.OS.cyl}</span>
+						) : (
+							<SelectMenus value={value.OS.cyl} onChange={(val) => _onChangeUnit(["OS", "cyl"], val)} />
+						)}
 					</div>
 					<div
 						className={clsx("flex  flex-1 items-center justify-center", {
 							["border-r border-gray-300 bg-[#f7f8fa]"]: type === "PROGRESSIVE" || readonly,
 						})}
 					>
-						{(type === "PROGRESSIVE" || readonly) ? (
+						{type === "PROGRESSIVE" || readonly ? (
 							<span className="text-neutral-400">None</span>
 						) : (
 							<SelectMenus value={value.OS.axis} onChange={(val) => _onChangeUnit(["OS", "axis"], val)} />
@@ -224,13 +216,11 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 					</div>
 					{(type === "PROGRESSIVE" || readonly) && (
 						<div className="flex flex-1 items-center justify-center">
-							{
-								readonly
-									? <span className="text-neutral-500">{value.OS.add}</span>
-									: (
-										<SelectMenus value={value.OS.add} onChange={(val) => _onChangeUnit(["OS", "add"], val)} />
-									)
-							}
+							{readonly ? (
+								<span className="text-neutral-500">{value.OS.add}</span>
+							) : (
+								<SelectMenus value={value.OS.add} onChange={(val) => _onChangeUnit(["OS", "add"], val)} />
+							)}
 						</div>
 					)}
 				</div>
@@ -258,43 +248,37 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						})}
 					>
 						{enabled && <span className="mr-1 text-xs text-neutral-400">Right</span>}
-						{
-							readonly
-							? <span className="text-neutral-500">{value.PD[1]}</span>
-							: (
-								<SelectMenus value={value.PD[1]} onChange={(val) => _onChangeUnit(["PD", "1"], val)} />
-							)
-						}
+						{readonly ? (
+							<span className="text-neutral-500">{value.PD[1]}</span>
+						) : (
+							<SelectMenus value={value.PD[1]} onChange={(val) => _onChangeUnit(["PD", "1"], val)} />
+						)}
 					</div>
 					{enabled && (
 						<div className="relative flex flex-1 items-center justify-center">
 							{enabled && <span className="ml-1 text-xs text-neutral-400">Left</span>}
-							{
-								readonly
-									? <span className="text-neutral-500">{value.PD[0]}</span>
-									: (
-										<SelectMenus value={value.PD[0]} onChange={(val) => _onChangeUnit(["PD", "0"], val)} />
-									)
-							}
+							{readonly ? (
+								<span className="text-neutral-500">{value.PD[0]}</span>
+							) : (
+								<SelectMenus value={value.PD[0]} onChange={(val) => _onChangeUnit(["PD", "0"], val)} />
+							)}
 						</div>
 					)}
 				</div>
 			</div>
 			<div className="mt-2 flex items-center">
-				{
-					!readonly && (
-						<>
-							<Checkbox
-								checked={enabled}
-								onChange={handleCheck}
-								className="ring-gray/15 data-[checked]:bg-gray group inline-block size-4 rounded-md bg-white p-1 ring-1 ring-inset"
-							>
-								<CheckIcon className="hidden size-2 fill-black group-data-[checked]:block" />
-							</Checkbox>
-							<span className="ml-2 text-sm text-neutral-700">2PD</span>
-						</>
-					)
-				}
+				{!readonly && (
+					<>
+						<Checkbox
+							checked={enabled}
+							onChange={handleCheck}
+							className="ring-gray/15 data-[checked]:bg-gray group inline-block size-4 rounded-md bg-white p-1 ring-1 ring-inset"
+						>
+							<CheckIcon className="hidden size-2 fill-black group-data-[checked]:block" />
+						</Checkbox>
+						<span className="ml-2 text-sm text-neutral-700">2PD</span>
+					</>
+				)}
 			</div>
 		</div>
 	);

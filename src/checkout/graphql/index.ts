@@ -28767,6 +28767,10 @@ export const CheckoutLineFragmentDoc = gql`
 	fragment CheckoutLineFragment on CheckoutLine {
 		id
 		quantity
+		metadata {
+			key
+			value
+		}
 		totalPrice {
 			gross {
 				currency
@@ -28796,6 +28800,15 @@ export const CheckoutLineFragmentDoc = gql`
 			name
 			translation(languageCode: $languageCode) {
 				name
+			}
+			pricing {
+				price {
+					currency
+					gross {
+						amount
+						currency
+					}
+				}
 			}
 			product {
 				name

@@ -11,6 +11,7 @@ export const getFormattedMoney = <TMoney extends Money>(money: MightNotExist<TMo
 	}
 
 	const { amount, currency } = money;
+	if (!currency) return null;
 
 	return new Intl.NumberFormat("en-US", {
 		style: "currency",

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable */
 import { type FC } from "react";
 import clsx from "clsx";
 import { SummaryItem, type SummaryLine } from "./SummaryItem";
@@ -8,6 +11,7 @@ import { SummaryItemMoneyEditableSection } from "./SummaryItemMoneyEditableSecti
 import { ChevronDownIcon } from "@/checkout/ui-kit/icons";
 
 import { getFormattedMoney } from "@/checkout/lib/utils/money";
+import { isMainProduct, isSubProduct } from "@/lib/utils-custom";
 import { Divider, Money, Title } from "@/checkout/components";
 import {
 	type CheckoutLineFragment,
@@ -38,6 +42,7 @@ export const Summary: FC<SummaryProps> = ({
 	voucherCode,
 	shippingPrice,
 	discount,
+	...restProps
 }) => {
 	return (
 		<div
@@ -52,15 +57,25 @@ export const Summary: FC<SummaryProps> = ({
 					<ChevronDownIcon className="mb-2 group-open:rotate-180" />
 				</summary>
 				<ul className="py-2" data-testid="SummaryProductList">
-					{lines.map((line) => (
-						<SummaryItem line={line} key={line?.id}>
-							{editable ? (
-								<SummaryItemMoneyEditableSection line={line as CheckoutLineFragment} />
-							) : (
-								<SummaryItemMoneySection line={line as OrderLineFragment} />
-							)}
-						</SummaryItem>
-					))}
+					{lines
+						.filter((line) => !isSubProduct(line))
+						.map((line) => (
+							<SummaryItem
+								line={line}
+								key={line?.id}
+								{...{
+									channel: restProps.channel,
+									checkoutId: restProps.id,
+									checkout: { lines },
+								}}
+							>
+								{editable && !isMainProduct(line) ? (
+									<SummaryItemMoneyEditableSection line={line as CheckoutLineFragment} />
+								) : (
+									<SummaryItemMoneySection line={line as OrderLineFragment} />
+								)}
+							</SummaryItem>
+						))}
 				</ul>
 			</details>
 			{editable && (

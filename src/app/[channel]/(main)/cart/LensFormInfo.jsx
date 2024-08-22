@@ -1,14 +1,15 @@
-'use client'
+"use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { produce } from 'immer'
+import { produce } from "immer";
 import clsx from "clsx";
-import gpl from 'graphql-tag'
+import gpl from "graphql-tag";
 import { useMutation, useQuery } from "urql";
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
-import { toast } from 'react-toastify'
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
 
 import VisionReportForm from "@/app/[channel]/(main)/products/[slug]/VisionReportForm.jsx";
 import { formatMoney, formatMoneyRange } from "@/lib/utils";
+import { calculateLinesPrice, isSubProduct } from "@/lib/utils-custom";
 import { useGlassesStepForm } from "@/app/[channel]/(main)/products/[slug]/GlassesStepFormContainer.jsx";
 
 const PRESCRIPTION_TYPES = [
@@ -28,17 +29,20 @@ const PRESCRIPTION_TYPES = [
 		description: "Select a magnification strength",
 	},
 ];
-const getPrescriptionLabel = (val) => val == null ? '--' : PRESCRIPTION_TYPES.find(item => item.value === val)?.label ?? '--'
+const getPrescriptionLabel = (val) =>
+	val == null ? "--" : PRESCRIPTION_TYPES.find((item) => item.value === val)?.label ?? "--";
 
 // 获取和主产品关联的产品对应的 checkout-line ids
 const getVariantRelatedCheckoutLineIds = (checkout, variantId) => {
 	if (!checkout || !checkout.lines) {
-		return null
+		return null;
 	}
-	return checkout.lines.filter(line => {
-		return line?.metadata?.find(meta => meta.key === 'related_variant_id')?.value === variantId
-	}).map(line => line.id)
-}
+	return checkout.lines
+		.filter((line) => {
+			return line?.metadata?.find((meta) => meta.key === "related_variant_id")?.value === variantId;
+		})
+		.map((line) => line.id);
+};
 
 const lensTypeStr = (form) => {
 	if (form["2"]?.variant?.product.name === form["2"]?.variant?.name) {
@@ -108,13 +112,13 @@ const LensAboutInfoDocument = gpl`
 			}
 		}
 	}
-`
+`;
 const useLensAboutInfoQuery = (options) => {
 	return useQuery({
 		query: LensAboutInfoDocument,
 		...options,
-	})
-}
+	});
+};
 const CheckoutDeleteLinesDocument = gpl`
 	mutation CheckoutDeleteLines($checkoutId: ID!, $lineIds: [ID!]!) {
 	  checkoutLinesDelete(id: $checkoutId, linesIds: $lineIds) {
@@ -127,7 +131,7 @@ const CheckoutDeleteLinesDocument = gpl`
 	    }
 	  }
 	}
-`
+`;
 const CheckoutAddMultiLinesDocument = gpl`
     mutation CheckoutAddMultiLines($id: ID!, $lines: [CheckoutLineInput!]!) {
         checkoutLinesAdd(id: $id, lines: $lines) {
@@ -169,20 +173,29 @@ const CheckoutLineMetadataUpdateDocument = gpl`
 			}
 		}
 	}
-`
+`;
 const useCheckoutLineMetadataMutation = () => {
-	return useMutation(CheckoutLineMetadataUpdateDocument)
-}
+	return useMutation(CheckoutLineMetadataUpdateDocument);
+};
 const useCheckoutDeleteLinesMutation = () => {
-	return useMutation(CheckoutDeleteLinesDocument)
-}
+	return useMutation(CheckoutDeleteLinesDocument);
+};
 
-function LensFormInfo({ lensForm, channel, checkoutId, checkoutLineId, checkout, product, variant }) {
-	const [, updateMetadata] = useCheckoutLineMetadataMutation()
-	const [, checkoutDeleteLines] = useCheckoutDeleteLinesMutation()
-	const [, checkoutAddMultiLines] = useMutation(CheckoutAddMultiLinesDocument)
+function LensFormInfo({
+	lensForm,
+	editable = true,
+	channel,
+	checkoutId,
+	checkoutLineId,
+	checkout,
+	product,
+	variant,
+}) {
+	const [, updateMetadata] = useCheckoutLineMetadataMutation();
+	const [, checkoutDeleteLines] = useCheckoutDeleteLinesMutation();
+	const [, checkoutAddMultiLines] = useMutation(CheckoutAddMultiLinesDocument);
 	const { open: openGlassStepForm } = useGlassesStepForm({
-		submitText: 'Update',
+		submitText: "Update",
 		onSubmit: async (form) => {
 			let simpleLensForm = {
 				0: form["0"],
@@ -195,31 +208,37 @@ function LensFormInfo({ lensForm, channel, checkoutId, checkoutLineId, checkout,
 					variantId: form["3"].variantId,
 					variant: null,
 				},
-			}
+			};
 			await updateMetadata({
 				checkoutLineId,
-				inputs: [
-					{ key: 'lens_form', value: JSON.stringify(simpleLensForm) }
-				]
-			})
-			const deletedLineIds = getVariantRelatedCheckoutLineIds(checkout, variant.id)
+				inputs: [{ key: "lens_form", value: JSON.stringify(simpleLensForm) }],
+			});
+			const deletedLineIds = getVariantRelatedCheckoutLineIds(checkout, variant.id);
 			if (deletedLineIds && deletedLineIds.length > 0) {
 				await checkoutDeleteLines({
 					checkoutId,
-					lineIds: deletedLineIds
-				})
+					lineIds: deletedLineIds,
+				});
 			}
 			const newLines = [
-				{ quantity: 1, variantId: form["2"]?.variantId, metadata: [{ key: 'related_variant_id', value: variant.id }] },
-				{ quantity: 1, variantId: form["3"]?.variantId, metadata: [{ key: 'related_variant_id', value: variant.id }] },
-			]
+				{
+					quantity: 1,
+					variantId: form["2"]?.variantId,
+					metadata: [{ key: "related_variant_id", value: variant.id }],
+				},
+				{
+					quantity: 1,
+					variantId: form["3"]?.variantId,
+					metadata: [{ key: "related_variant_id", value: variant.id }],
+				},
+			];
 			await checkoutAddMultiLines({
 				id: checkoutId,
-				lines: newLines
-			})
-			toast('Updated')
-		}
-	})
+				lines: newLines,
+			});
+			toast("Updated");
+		},
+	});
 
 	const [open, setOpen] = useState(false);
 
@@ -230,23 +249,23 @@ function LensFormInfo({ lensForm, channel, checkoutId, checkoutLineId, checkout,
 			lensTypeVariantId: lensForm?.["2"]?.variantId,
 			lensThicknessVariantId: lensForm?.["3"]?.variantId,
 		},
-		pause: shouldPause
-	})
+		pause: shouldPause,
+	});
 
 	useEffect(() => {
 		if (lensForm && lensForm["2"]?.variantId && lensForm["3"]?.variantId) {
-			setShouldPause(false)
+			setShouldPause(false);
 		}
 	}, [lensForm]);
 	// 带有具体变体和产品数据的 form
 	const form = useMemo(() => {
 		if (lensForm && data) {
-			return produce(lensForm, draft => {
-				draft["2"].variant = data.lensTypeVariant
-				draft["3"].variant = data.lensThicknessVariant
+			return produce(lensForm, (draft) => {
+				draft["2"].variant = data.lensTypeVariant;
+				draft["3"].variant = data.lensThicknessVariant;
 			});
 		}
-		return lensForm
+		return lensForm;
 	}, [data]);
 
 	const handleEdit = () => {
@@ -254,21 +273,29 @@ function LensFormInfo({ lensForm, channel, checkoutId, checkoutLineId, checkout,
 			channel,
 			product,
 			variant,
-			form
-		})
+			form,
+		});
 	};
 
 	return (
-		<div>
-			<div className="flex flex-row items-center cursor-pointer" onClick={() => setOpen(prevState => !prevState)}>
-				<span className="mr-1 text-sm text-neutral-500">Prescription: {getPrescriptionLabel(lensForm?.["0"])}</span>
-				<ChevronDownIcon className={clsx("size-4 cursor-pointer transition", {
-					"rotate-180": open,
-				})}/>
-			</div>
+		<div className="mt-2 w-full">
 			<div
-				className="mt-1 overflow-hidden"
+				className="flex cursor-pointer flex-row items-center"
+				onClick={() => setOpen((prevState) => !prevState)}
 			>
+				<span className="mr-1 text-sm text-neutral-500">
+					Prescription: {getPrescriptionLabel(lensForm?.["0"])}
+				</span>
+				<ChevronDownIcon
+					className={clsx("size-4 cursor-pointer transition", {
+						"rotate-180": open,
+					})}
+				/>
+				<div className="ml-2 text-xs text-neutral-500">
+					{calculateLinesPrice(checkout.lines.filter((line) => isSubProduct(line)))}
+				</div>
+			</div>
+			<div className="overflow-hidden">
 				<div
 					className={clsx("-translate-y-full transition", {
 						["translate-y-1"]: open,
@@ -286,19 +313,15 @@ function LensFormInfo({ lensForm, channel, checkoutId, checkoutLineId, checkout,
 						<span className="ml-auto">{formatVariantPrice(form["3"].variant)}</span>
 					</div>
 					<div className="flex-1 overflow-y-auto">
-						{
-							lensForm && (
-								<VisionReportForm
-									type={form[0]}
-									value={form[1].prescriptionData}
-									readonly
-								/>
-							)
-						}
+						{lensForm && <VisionReportForm type={form[0]} value={form[1].prescriptionData} readonly />}
 					</div>
-					<div className="flex justify-around items-center mb-2">
-						<div className="px-12 py-0.5 border border-neutral-500 cursor-pointer" onClick={handleEdit}>Edit</div>
-					</div>
+					{editable && (
+						<div className="mb-2 flex items-center justify-around">
+							<div className="cursor-pointer border border-neutral-500 px-12 py-0.5" onClick={handleEdit}>
+								Edit
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

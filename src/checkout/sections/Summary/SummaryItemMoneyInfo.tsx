@@ -18,7 +18,7 @@ export const SummaryItemMoneyInfo: React.FC<SummaryItemMoneyInfoProps> = ({
 }) => {
 	const multiplePieces = quantity > 1;
 	const piecePrice = unitPrice.gross;
-	const onSale = undiscountedUnitPrice.amount !== unitPrice.gross.amount;
+	const onSale = undiscountedUnitPrice?.amount !== unitPrice.gross.amount;
 
 	return (
 		<div className="flex flex-col items-end justify-end">
@@ -27,8 +27,8 @@ export const SummaryItemMoneyInfo: React.FC<SummaryItemMoneyInfoProps> = ({
 					<Money
 						ariaLabel="undiscounted price"
 						money={{
-							currency: undiscountedUnitPrice.currency,
-							amount: undiscountedUnitPrice.amount * quantity,
+							currency: undiscountedUnitPrice?.currency,
+							amount: undiscountedUnitPrice?.amount * quantity,
 						}}
 						className="line-through"
 					/>
