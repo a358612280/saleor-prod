@@ -39,3 +39,17 @@ export const parseLensForm = (line) => {
 		return null;
 	}
 };
+
+export const getLensFormFromCheckout = (checkout) => {
+	let str = checkout?.lines
+		.find((line) => line.metadata.some((item) => item.key == "lens_form"))
+		?.metadata?.find((item) => item?.key === "lens_form")?.value;
+	if (!str || str.trim().length === 0) {
+		return null;
+	}
+	try {
+		return JSON.parse(str);
+	} catch (e) {
+		return null;
+	}
+};
