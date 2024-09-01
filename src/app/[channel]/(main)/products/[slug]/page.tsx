@@ -118,7 +118,7 @@ export default async function Page({
 	const variants = product.variants;
 	const selectedVariantID = searchParams.variant;
 	const selectedVariant = variants?.find(({ id }) => id === selectedVariantID);
-	const selectedVariantMediaId = selectedVariant?.media?.[0].id || null;
+	const selectedVariantMediaId = selectedVariant?.media?.[0]?.id || null;
 
 	async function addItem() {
 		"use server";
