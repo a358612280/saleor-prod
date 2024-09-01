@@ -7,13 +7,19 @@ import { CheckoutDeleteLinesDocument } from "@/gql/graphql";
 type deleteLineFromCheckoutArgs = {
 	lineId: string;
 	checkoutId: string;
+	subLineIds?: [string] | [];
 };
 
-export const deleteLineFromCheckout = async ({ lineId, checkoutId }: deleteLineFromCheckoutArgs) => {
+export const deleteLineFromCheckout = async ({
+	lineId,
+	checkoutId,
+	subLineIds = [],
+}: deleteLineFromCheckoutArgs) => {
 	await executeGraphQL(CheckoutDeleteLinesDocument, {
 		variables: {
 			checkoutId,
-			lineIds: [lineId],
+			// TODO check
+			lineIds: [lineId, ...subLineIds].filter((item) => item != null),
 		},
 		cache: "no-cache",
 	});

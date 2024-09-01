@@ -33,25 +33,25 @@ const SelectMenus = ({ value, onChange = () => {} }) => {
 		<Listbox value={selected} onChange={setSelected}>
 			{/*<Label className="block text-sm font-medium leading-6 text-gray-900">Assigned to</Label>*/}
 			<div className="relative">
-				<ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm sm:text-sm sm:leading-6">
+				<ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm max-sm:px-0 sm:text-sm sm:leading-6">
 					<span className="flex items-center">
 						{/*<img alt="" src={selected.avatar} className="h-5 w-5 flex-shrink-0 rounded-full" />*/}
-						<span className="ml-3 block truncate">{selected.value.toFixed(2)}</span>
+						<span className="ml-3 block truncate max-sm:ml-0">{selected.value.toFixed(2)}</span>
 					</span>
-					<span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
+					<span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2 max-sm:hidden">
 						<ChevronUpDownIcon aria-hidden="true" className="h-5 w-5 text-gray-400" />
 					</span>
 				</ListboxButton>
 				{/* 选项 */}
 				<ListboxOptions
 					transition
-					className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in sm:text-sm"
+					className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in max-sm:w-[82px] max-sm:-translate-x-1/4 sm:text-sm"
 				>
 					{options.map((item) => (
 						<ListboxOption
 							key={item.value}
 							value={item}
-							className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
+							className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white max-sm:px-2"
 						>
 							<div className="flex items-center">
 								{/*<img alt="" src={item.avatar} className="h-5 w-5 flex-shrink-0 rounded-full" />*/}
@@ -104,6 +104,9 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 		if (key1 == "PD") {
 			const newPd = [...value.PD];
 			newPd[key2] = val;
+			if (!enabled) {
+				newPd[0] = val;
+			}
 			onChange({
 				...value,
 				PD: newPd,
@@ -120,11 +123,11 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 	};
 
 	return (
-		<div style={{ minWidth: 300 }}>
+		<div className="min-w-[300px] max-sm:w-full">
 			<div className="min-h-[120px] w-full border-collapse rounded border border-gray-300 bg-white text-sm shadow-sm">
 				{/* 第一行 */}
 				<div className="flex h-12 flex-row border-b border-gray-300 bg-[#eef2fb]">
-					<div className="flex-1 border-r border-gray-300"></div>
+					<div className="flex-1  border-r border-gray-300"></div>
 					<div className="flex flex-1 items-center justify-center border-r border-gray-300">SPH</div>
 					<div className="flex flex-1 items-center justify-center border-r border-gray-300">CYL</div>
 					<div
@@ -140,20 +143,20 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 				</div>
 				{/* 第二行 */}
 				<div className="flex h-12 flex-row border-b border-gray-300">
-					<div className="flex flex-1 items-center border-r border-gray-300 bg-[#eef2fb]">
+					<div className="flex flex-1 shrink-0 items-center border-r border-gray-300 bg-[#eef2fb]">
 						<span className="ml-2">
 							OD <br />
 							<span className="text-xs text-[#999]">(Right)</span>
 						</span>
 					</div>
-					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+					<div className="flex flex-1 shrink-0 items-center justify-center border-r border-gray-300">
 						{readonly ? (
 							<span className="text-neutral-500">{value.OD.sph}</span>
 						) : (
 							<SelectMenus value={value.OD.sph} onChange={(val) => _onChangeUnit(["OD", "sph"], val)} />
 						)}
 					</div>
-					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+					<div className="flex flex-1 shrink-0 items-center justify-center border-r border-gray-300">
 						{readonly ? (
 							<span className="text-neutral-500">{value.OD.cyl}</span>
 						) : (
@@ -161,7 +164,7 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						)}
 					</div>
 					<div
-						className={clsx("flex flex-1 items-center justify-center", {
+						className={clsx("flex flex-1 shrink-0 items-center justify-center", {
 							["border-r border-gray-300 bg-[#f7f8fa]"]: type === "PROGRESSIVE" || readonly,
 						})}
 					>
@@ -172,7 +175,7 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						)}
 					</div>
 					{(type === "PROGRESSIVE" || readonly) && (
-						<div className="flex flex-1 items-center justify-center">
+						<div className="flex flex-1 shrink-0 items-center justify-center">
 							{readonly ? (
 								<span className="text-neutral-500">{value.OD.add}</span>
 							) : (
@@ -183,20 +186,20 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 				</div>
 				{/* 第三行 */}
 				<div className="flex h-12 flex-row">
-					<div className="flex flex-1 items-center border-r border-gray-300 bg-[#eef2fb]">
+					<div className="flex flex-1 shrink-0 items-center border-r border-gray-300 bg-[#eef2fb]">
 						<span className="ml-2">
 							OS <br />
 							<span className=" text-xs text-[#999]">(Left)</span>
 						</span>
 					</div>
-					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+					<div className="flex flex-1 shrink-0 items-center justify-center border-r border-gray-300">
 						{readonly ? (
 							<span className="text-neutral-500">{value.OS.sph}</span>
 						) : (
 							<SelectMenus value={value.OS.sph} onChange={(val) => _onChangeUnit(["OS", "sph"], val)} />
 						)}
 					</div>
-					<div className="flex flex-1 items-center justify-center border-r border-gray-300">
+					<div className="flex flex-1 shrink-0 items-center justify-center border-r border-gray-300">
 						{readonly ? (
 							<span className="text-neutral-500">{value.OS.cyl}</span>
 						) : (
@@ -204,7 +207,7 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						)}
 					</div>
 					<div
-						className={clsx("flex  flex-1 items-center justify-center", {
+						className={clsx("flex flex-1 shrink-0 items-center justify-center", {
 							["border-r border-gray-300 bg-[#f7f8fa]"]: type === "PROGRESSIVE" || readonly,
 						})}
 					>
@@ -215,7 +218,7 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						)}
 					</div>
 					{(type === "PROGRESSIVE" || readonly) && (
-						<div className="flex flex-1 items-center justify-center">
+						<div className="flex flex-1 shrink-0 items-center justify-center">
 							{readonly ? (
 								<span className="text-neutral-500">{value.OS.add}</span>
 							) : (
@@ -236,14 +239,14 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 				})}
 			>
 				<div className="flex h-12 flex-row">
-					<div className="flex flex-1 items-center border-r border-gray-300 bg-[#eef2fb]">
+					<div className="flex flex-1 shrink-0 items-center border-r border-gray-300 bg-[#eef2fb]">
 						<span className="ml-2">
 							PD <br />
-							<span className=" text-xs text-[#999]">(Pupillary distance)</span>
+							<span className=" text-xs text-[#999] max-sm:hidden">(Pupillary distance)</span>
 						</span>
 					</div>
 					<div
-						className={clsx("relative flex flex-1 items-center justify-center", {
+						className={clsx("relative flex flex-1 shrink-0 items-center justify-center", {
 							["border-r border-gray-300"]: enabled,
 						})}
 					>
@@ -255,7 +258,7 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						)}
 					</div>
 					{enabled && (
-						<div className="relative flex flex-1 items-center justify-center">
+						<div className="relative flex flex-1 shrink-0 items-center justify-center">
 							{enabled && <span className="ml-1 text-xs text-neutral-400">Left</span>}
 							{readonly ? (
 								<span className="text-neutral-500">{value.PD[0]}</span>
@@ -279,6 +282,9 @@ function VisionReportForm({ type, value, onChange = () => {}, readonly = false }
 						<span className="ml-2 text-sm text-neutral-700">2PD</span>
 					</>
 				)}
+			</div>
+			<div className="hidden text-xs max-sm:block">
+				<div className="text-neutral-400">PD：(Pupillary distance)</div>
 			</div>
 		</div>
 	);

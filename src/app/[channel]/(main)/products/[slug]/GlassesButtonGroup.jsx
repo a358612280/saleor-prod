@@ -24,7 +24,9 @@ function GlassesButtonGroup({ channel, variant, product, onClickFrameOnly, onAdd
 			<button
 				disabled={variant == null}
 				className="ml-4 h-12 items-center rounded-md bg-white px-6 py-3 text-base font-medium leading-6 text-neutral-800 shadow hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 hover:disabled:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-70 hover:aria-disabled:bg-transparent"
-				onClick={onClickFrameOnly}
+				onClick={async () => {
+					await onClickFrameOnly();
+				}}
 			>
 				Frame Only
 			</button>

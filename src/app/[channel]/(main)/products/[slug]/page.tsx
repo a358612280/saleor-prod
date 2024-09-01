@@ -269,7 +269,7 @@ export default async function Page({
 				}}
 			/>
 			<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-8">
-				<div className="md:col-span-1 lg:col-span-5">
+				<div className="overflow-hidden md:col-span-1 lg:col-span-5">
 					{!enableCarousel ? (
 						firstImage && (
 							<ProductImageWrapper

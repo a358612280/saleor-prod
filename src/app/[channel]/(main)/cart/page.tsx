@@ -16,6 +16,17 @@ export const metadata = {
 	title: "Shopping Cart · Saleor Storefront example",
 };
 
+const getSubLinesByMainVariantId = (checkout, variantId) => {
+	if (!variantId) {
+		return [];
+	}
+	return (
+		checkout?.lines?.filter(
+			(line) => line?.metadata?.some((meta) => meta.key === "related_variant_id" && meta.value === variantId),
+		) || []
+	);
+};
+
 export default async function Page({ params }: { params: { channel: string } }) {
 	const checkoutId = Checkout.getIdFromCookies(params.channel);
 
@@ -111,7 +122,13 @@ export default async function Page({ params }: { params: { channel: string } }) 
 									) : null}
 									<div className="flex justify-between">
 										<div className="text-sm font-bold">Qty: {item.quantity}</div>
-										<DeleteLineButton checkoutId={checkoutId} lineId={item.id} />
+										<DeleteLineButton
+											checkoutId={checkoutId}
+											lineId={item.id}
+											subLineIds={getSubLinesByMainVariantId(checkout, item.variant.id).map(
+												(line) => line.id,
+											)}
+										/>
 									</div>
 								</div>
 							</li>
