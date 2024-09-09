@@ -53,6 +53,9 @@ importers:
       libphonenumber-js:
         specifier: 1.10.58
         version: 1.10.58
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
       lodash-es:
         specifier: 4.17.21
         version: 4.17.21

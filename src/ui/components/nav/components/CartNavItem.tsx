@@ -7,7 +7,22 @@ export const CartNavItem = async ({ channel }: { channel: string }) => {
 	const checkoutId = Checkout.getIdFromCookies(channel);
 	const checkout = checkoutId ? await Checkout.find(checkoutId) : null;
 
-	const lineCount = checkout ? checkout.lines.reduce((result, line) => result + line.quantity, 0) : 0;
+	// old logic
+	// const lineCount = checkout ? checkout.lines.reduce((result, line) => result + line.quantity, 0) : 0;
+	// new logic: exclude sub products
+	const lineCount = checkout
+		? checkout.lines
+				.filter((line) => {
+					const isSub =
+						line?.metadata.some(
+							(meta) =>
+								meta.key == "related_variant_id" &&
+								checkout.lines.some((_line) => _line.variant.id == meta.value),
+						) || false;
+					return !isSub;
+				})
+				.reduce((result, line) => result + line.quantity, 0)
+		: 0;
 
 	return (
 		<LinkWithChannel href="/cart" className="relative flex items-center" data-testid="CartNavItem">

@@ -1,9 +1,10 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { XMarkIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { produce } from "immer";
+import { toast, Bounce } from "react-toastify";
 
 import { formatMoney, formatMoneyRange } from "@/lib/utils";
 import VisionReportForm from "./VisionReportForm";
@@ -30,98 +31,117 @@ const PRESCRIPTION_TYPES = [
 const Magnification_Strength_ARRAY = Array(24)
 	.fill(null)
 	.map((_, i) => 0.25 + 0.25 * i);
-const LENS_PARAM_CATEGORIES = [
+const LENS_CATEGORIES = [
 	{
 		id: 1,
 		scopes: [
-			["sph", "0-300"],
-			["cyl", "0-200"],
+			["sph", "0-3"],
+			["cyl", "0-0.2"],
 		],
-		options: [1.56, 1.61, 1.67],
+		options: ["1.56", "1.61", "1.67"],
+		recommend: "1.56",
 	},
 	{
 		id: 2,
 		scopes: [
-			["sph", "0-300"],
-			["cyl", "225-400"],
+			["sph", "0-3"],
+			["cyl", "2.25-4"],
 		],
 		options: ["1.56高散", "1.61高散", "1.67高散"],
+		recommend: "1.61高散",
 	},
 	{
 		id: 3,
 		scopes: [
-			["sph", "0-300"],
-			["cyl", "425-600"],
+			["sph", "0-3"],
+			["cyl", "4.25-6"],
 		],
 		options: ["1.61超-高散", "1.67超-高散", "1.74超-高散"],
+		recommend: "1.67超-高散",
 	},
+
 	{
 		id: 4,
 		scopes: [
-			["sph", "325-600"],
-			["cyl", "0-200"],
+			["sph", "3.25-6"],
+			["cyl", "0-2"],
 		],
-		options: [1.56, 1.61, 1.67, 1.74],
+		options: ["1.56", "1.61", "1.67", "1.74"],
+		recommend: "1.61",
 	},
 	{
 		id: 5,
 		scopes: [
-			["sph", "325-600"],
-			["cyl", "225-400"],
+			["sph", "3.25-6"],
+			["cyl", "2.25-4"],
 		],
 		options: ["1.56高散", "1.61高散", "1.67高散"],
+		recommend: "1.67高散",
 	},
 	{
 		id: 6,
 		scopes: [
-			["sph", "325-600"],
-			["cyl", "425-600"],
+			["sph", "3.25-6"],
+			["cyl", "4.25-6"],
 		],
 		options: ["1.61超-高散", "1.67超-高散", "1.74超-高散"],
+		recommend: "1.67超-高散",
 	},
+
 	{
 		id: 7,
 		scopes: [
-			["sph", "625-800"],
-			["cyl", "0-200"],
+			["sph", "6.25-8"],
+			["cyl", "0-2"],
 		],
 		options: ["1.61", "1.67", "1.74"],
+		recommend: "1.67",
 	},
 	{
 		id: 8,
 		scopes: [
-			["sph", "625-800"],
-			["cyl", "225-400"],
+			["sph", "6.25-8"],
+			["cyl", "2.25-4"],
 		],
 		options: ["1.67高散", "1.74高散"],
+		recommend: "1.67高散",
 	},
 	{
 		id: 9,
 		scopes: [
-			["sph", "625-800"],
-			["cyl", "425-600"],
+			["sph", "6.25-8"],
+			["cyl", "4.25-6"],
 		],
 		options: ["1.67超-高散", "1.74超-高散"],
+		recommend: "1.67超-高散",
 	},
+
 	{
 		id: 10,
 		scopes: [
-			["sph", "825-1200"],
-			["cyl", "0-600"],
+			["sph", "8.25-12"],
+			["cyl", "0-6"],
 		],
 		options: ["1.67超薄", "1.74超薄"],
+		recommend: "1.67超薄",
 	},
 ];
-const getLensParamCategory = (prescriptionData) => {
-	for (let i = 0; i < LENS_PARAM_CATEGORIES.length; i++) {
-		let category = LENS_PARAM_CATEGORIES[i];
+const getLensCategory = (data = { sph: 0, cyl: 0 }) => {
+	if (data.sph == null || data.cyl == null) {
+		return null;
+	}
+	for (let i = 0; i < LENS_CATEGORIES.length; i++) {
+		let category = LENS_CATEGORIES[i];
 		if (!category.scopes) {
 			continue;
 		}
 		let hit = category.scopes.every((scope) => {
 			const name = scope[0];
 			let range = scope[1].split("-").map((str) => Number(str));
-			return prescriptionData[name] >= range[0] && prescriptionData[name] <= range[1];
+			if (isNaN(range[0]) || isNaN(range[1])) {
+				return null;
+			}
+			return Math.abs(data[name]) >= range[0] && Math.abs(data[name]) <= range[1];
 		});
 		if (!hit) {
 			continue;
@@ -158,41 +178,44 @@ const formatVariantPrice = (variant) =>
 		? null
 		: formatMoney(variant.pricing.price.gross.amount, variant.pricing.price.gross.currency);
 
+const INITIAL_FORM = {
+	0: null,
+	1: {
+		prescriptionData: {
+			OD: {
+				sph: null,
+				cyl: null,
+				axis: null,
+				add: null,
+			},
+			OS: {
+				sph: null,
+				cyl: null,
+				axis: null,
+				add: null,
+			},
+			PD: [null, null], // right-PD, left-PD
+		},
+		prescriptionFile: null,
+		// TODO strength 修改的其实是 sph，这个字段之后可以去掉
+		strength: null,
+	},
+	2: {
+		variantId: null, // 变体id
+		variant: null,
+	},
+	3: {
+		variantId: null, // 变体id
+		variant: null,
+	},
+};
+
 const GlassesStepFormDialog = forwardRef(
 	({ channel, variant, product, submitText = "Confirm", onSubmit }, ref) => {
+		const visionFormRef = useRef(null);
+
 		const [vis, setVis] = useState(false);
-		const [form, setForm] = useState({
-			0: null,
-			1: {
-				prescriptionData: {
-					OD: {
-						sph: null,
-						cyl: null,
-						axis: null,
-						add: null,
-					},
-					OS: {
-						sph: null,
-						cyl: null,
-						axis: null,
-						add: null,
-					},
-					PD: [null, null], // right-PD, left-PD
-				},
-				prescriptionFile: null,
-				// TODO strength 修改的其实是 sph，这个字段之后可以去掉
-				strength: null,
-			},
-			2: {
-				variantId: null, // 变体id
-				variant: null,
-			},
-			3: {
-				variantId: null, // 变体id
-				variant: null,
-			},
-		});
-		const [IsTwoPd, setIsTwoPd] = useState(false);
+		const [form, setForm] = useState(INITIAL_FORM);
 		const [currStep, setCurrStep] = useState(0);
 		const currTitle = useMemo(() => {
 			if (currStep === 0) {
@@ -231,6 +254,16 @@ const GlassesStepFormDialog = forwardRef(
 			return formatMoney(amount, currency);
 		}, [variant, form]);
 
+		const lensCategory = useMemo(() => {
+			if (currStep < 3) {
+				return null;
+			}
+			return getLensCategory({
+				sph: form[1].prescriptionData.OD.sph,
+				cyl: form[1].prescriptionData.OD.cyl,
+			});
+		}, [currStep, form]);
+
 		const open = (form) => {
 			setVis(true);
 			// reset form
@@ -241,9 +274,13 @@ const GlassesStepFormDialog = forwardRef(
 		const close = () => {
 			setVis(false);
 		};
+		const reset = () => {
+			setForm(INITIAL_FORM);
+		};
 		useImperativeHandle(ref, () => ({
 			open,
 			close,
+			reset,
 		}));
 
 		const handleChange = (step, val) => {
@@ -275,13 +312,13 @@ const GlassesStepFormDialog = forwardRef(
 						}),
 					);
 				} else if (val[0] === "prescriptionData") {
-					setForm({
+					setForm((form) => ({
 						...form,
 						1: {
 							...form[1],
 							prescriptionData: val[1],
 						},
-					});
+					}));
 				}
 			} else if (step === 2) {
 				setForm({
@@ -305,6 +342,20 @@ const GlassesStepFormDialog = forwardRef(
 					if (["SINGLE_VISION", "PROGRESSIVE"].includes(form[0])) {
 						// if (form[1].strength != null) {
 						// TODO 要检查下
+						if (visionFormRef.current?.hasErr) {
+							toast.info("Please fill the form.", {
+								position: "top-center",
+								autoClose: 1500,
+								hideProgressBar: true,
+								closeOnClick: true,
+								pauseOnHover: false,
+								draggable: false,
+								progress: undefined,
+								theme: "light",
+								transition: Bounce,
+							});
+							return;
+						}
 						setCurrStep((prevState) => prevState + 1);
 						// }
 					} else if (form[0] === "READER") {
@@ -378,7 +429,7 @@ const GlassesStepFormDialog = forwardRef(
 				<div className="flex h-full flex-[2] flex-col justify-center px-12 pb-16 pt-4 max-sm:m-0 max-sm:mb-[64px] max-sm:h-[148px] max-sm:shrink-0 max-sm:flex-grow-0 max-sm:flex-row max-sm:items-center max-sm:justify-evenly max-sm:p-0">
 					<div className="h-2/5 max-sm:h-full">
 						{/*	img */}
-						<img
+						<imgf
 							src={variant?.media?.[0]?.url}
 							alt=""
 							className="h-full w-full rounded bg-white object-contain max-sm:mt-12 max-sm:h-auto max-sm:w-[102px]"
@@ -472,6 +523,7 @@ const GlassesStepFormDialog = forwardRef(
 					>
 						{["SINGLE_VISION", "PROGRESSIVE"].includes(form[0]) && (
 							<VisionReportForm
+								ref={visionFormRef}
 								type={form[0]}
 								value={form[1].prescriptionData}
 								onChange={(newVal) => handleChange(1, ["prescriptionData", newVal])}
@@ -509,6 +561,7 @@ const GlassesStepFormDialog = forwardRef(
 						visible={currStep === 3}
 						value={form["3"]}
 						onChange={(val) => handleChange(3, val)}
+						lensCategory={lensCategory}
 					/>
 				</div>
 			</div>

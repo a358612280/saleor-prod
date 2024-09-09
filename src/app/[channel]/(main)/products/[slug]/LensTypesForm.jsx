@@ -23,32 +23,6 @@ const transformHtmlToText = (content) => {
 	}
 };
 
-const LENS_TYPES = [
-	{
-		value: "STANDARD",
-		label: "Standard Eyeglass Lenses",
-		description: "Traditional, transparent lenses perfect for everyday use",
-		price: 1,
-	},
-	{
-		value: "BLUE_LIGHT_BLOCKING",
-		label: "Blue Light Blocking",
-		description: "Protect your eyes from the negative side effects of digital screens",
-		price: 4,
-	},
-	{
-		value: "PHOTOCHROMIC",
-		label: "Photochromic",
-		description: "The best for people who want fully clear indoor and fast darkness outdoors.",
-		price: 12,
-	},
-	{
-		value: "COLOR_TINT",
-		label: "Color Tint",
-		description: "Tint or coat your lenses and turn regular lenses into sunglasses",
-		price: 16,
-	},
-];
 // 查询产品类型为 LensType 的信息
 const LensTypeDocument = gql`
 	query LensTypeList {

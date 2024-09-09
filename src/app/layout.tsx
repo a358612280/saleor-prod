@@ -2,6 +2,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { type ReactNode } from "react";
 import { type Metadata } from "next";
+import { Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import UIThemeProvider from "./UIThemeProvider";
 import { DraftModeNotification } from "@/ui/components/DraftModeNotification";
 
@@ -23,6 +25,19 @@ export default function RootLayout(props: { children: ReactNode }) {
 			<body className={`${inter.className} min-h-dvh`}>
 				<UIThemeProvider>{children}</UIThemeProvider>
 				<DraftModeNotification />
+				<ToastContainer
+					position="top-center"
+					autoClose={3000}
+					hideProgressBar={false}
+					newestOnTop={false}
+					closeOnClick
+					rtl={false}
+					pauseOnFocusLoss
+					draggable
+					pauseOnHover
+					theme="light"
+					transition={Bounce}
+				/>
 			</body>
 		</html>
 	);

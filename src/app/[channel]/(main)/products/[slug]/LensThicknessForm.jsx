@@ -49,7 +49,7 @@ const LENS_TYPES = [
 		price: 16,
 	},
 ];
-// 查询产品类型为 LensType 的信息
+// 查询产品类型为 LensType 的信息，search 固定为“LensThickness”
 const LensThicknessDocument = gql`
 	query LensTypeList {
 		productTypes(filter: { search: "LensThickness" }, first: 1) {
@@ -151,16 +151,46 @@ const useLensThicknessProductList = (channel) => {
 	};
 };
 
-const LensThicknessForm = ({ channel, visible, value, onChange }) => {
+/**
+ *
+ * @param channel
+ * @param visible
+ * @param value - 最后一步的镜片厚度选择 { variantId: null, variant: null }
+ * @param onChange - 更新 value
+ * @param lensCategory - 镜片的分类信息 demo {
+ *     "id": 4,
+ *     "scopes": [["sph", "3.25-6"],["cyl","0-2"]],
+ *     "options": ["1.56","1.61","1.67","1.74"],
+ *     "recommend": "1.61"
+ * }
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const LensThicknessForm = ({ channel, visible, value, onChange, lensCategory }) => {
 	const { data } = useLensThicknessProductList(channel);
-	// console.log("Thickness data", data);
+	const filteredEdges = useMemo(() => {
+		if (!lensCategory) {
+			return null;
+		}
+		return (
+			lensCategory?.options
+				.map((name) => data?.products.edges.find(({ node }) => node.name === name))
+				.filter((item) => item != null) || null
+		);
+	}, [data, lensCategory]);
+
 	return (
 		<div
 			className={clsx("flex-1 overflow-y-auto", {
 				hidden: !visible,
 			})}
 		>
-			{data?.products.edges.map(({ node }) => (
+			{(!filteredEdges || filteredEdges.length === 0) && (
+				<div className="text-center">
+					<span className="italic text-neutral-400">No available items.</span>
+				</div>
+			)}
+			{filteredEdges.map(({ node }) => (
 				<div
 					key={node.id}
 					onClick={() => {
@@ -198,4 +228,6 @@ const LensThicknessForm = ({ channel, visible, value, onChange }) => {
 		</div>
 	);
 };
+LensThicknessForm.displayName = "LensThicknessForm";
+
 export default LensThicknessForm;
