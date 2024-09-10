@@ -3,12 +3,12 @@ version: "3"
 services:
   saleor-storefront:
     image: saleor-storefront-custom
-    #    container_name: saleor-storefront
-    #    build:
-    #      dockerfile: Dockerfile
-    #      args:
-    #        NEXT_PUBLIC_SALEOR_API_URL: ${NEXT_PUBLIC_SALEOR_API_URL}
-    #        NEXT_PUBLIC_STOREFRONT_URL: ${NEXT_PUBLIC_STOREFRONT_URL}
+    container_name: saleor-storefront-custom
+    build:
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SALEOR_API_URL: ${NEXT_PUBLIC_SALEOR_API_URL}
+        NEXT_PUBLIC_STOREFRONT_URL: ${NEXT_PUBLIC_STOREFRONT_URL}
     restart: always
     ports:
       - 3000:3000
