@@ -6,12 +6,11 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Get PNPM version from package.json
-RUN export PNPM_VERSION=$(cat package.json | jq '.engines.pnpm' | sed -E 's/[^0-9.]//g')
-
+# Enable Corepack and install pnpm
+RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
-RUN yarn global add pnpm@$PNPM_VERSION
-RUN pnpm i --frozen-lockfile --prefer-offline
+RUN corepack prepare pnpm@9.6.0 --activate
+RUN pnpm install --frozen-lockfile --prefer-offline
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -30,9 +29,9 @@ ENV NEXT_PUBLIC_SALEOR_API_URL=${NEXT_PUBLIC_SALEOR_API_URL}
 ARG NEXT_PUBLIC_STOREFRONT_URL
 ENV NEXT_PUBLIC_STOREFRONT_URL=${NEXT_PUBLIC_STOREFRONT_URL}
 
-# Get PNPM version from package.json
-RUN export PNPM_VERSION=$(cat package.json | jq '.engines.pnpm' | sed -E 's/[^0-9.]//g')
-RUN yarn global add pnpm@$PNPM_VERSION
+# Enable Corepack and install pnpm
+RUN corepack enable
+RUN corepack prepare pnpm@9.6.0 --activate
 
 RUN pnpm build
 
