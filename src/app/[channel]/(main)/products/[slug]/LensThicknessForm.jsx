@@ -190,7 +190,7 @@ const LensThicknessForm = ({ channel, visible, value, onChange, lensCategory }) 
 					<span className="italic text-neutral-400">No available items.</span>
 				</div>
 			)}
-			{filteredEdges.map(({ node }) => (
+			{filteredEdges?.map(({ node }) => (
 				<div
 					key={node.id}
 					onClick={() => {
