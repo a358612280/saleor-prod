@@ -185,17 +185,20 @@ export default async function Page({
 					quantity: 1,
 					variantId: productVariantId,
 					metadata: [{ key: "lens_form", value: JSON.stringify(simpleLensForm) }],
+					forceNewLine: true,
 				},
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
 				{
 					quantity: 1,
 					variantId: lensForm["2"]?.variantId,
 					metadata: [{ key: "related_variant_id", value: productVariantId }],
+					forceNewLine: true,
 				},
 				{
 					quantity: 1,
 					variantId: lensForm["3"]?.variantId,
 					metadata: [{ key: "related_variant_id", value: productVariantId }],
+					forceNewLine: true,
 				},
 			];
 			console.log("lines", lines);

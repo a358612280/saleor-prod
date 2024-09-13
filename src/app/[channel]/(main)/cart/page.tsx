@@ -16,15 +16,17 @@ export const metadata = {
 	title: "Shopping Cart · Saleor Storefront example",
 };
 
-const getSubLinesByMainVariantId = (checkout, variantId) => {
-	if (!variantId) {
+const getSubLineIdsByMainVariant = (checkout, item) => {
+	if (!item) {
 		return [];
 	}
-	return (
-		checkout?.lines?.filter(
-			(line) => line?.metadata?.some((meta) => meta.key === "related_variant_id" && meta.value === variantId),
-		) || []
-	);
+	const lensForm = JSON.parse(item?.metadata?.find((meta) => meta.key === "lens_form")?.value);
+	const ids = [lensForm["2"]?.variantId, lensForm["3"]?.variantId].filter((item) => item != null);
+	const lineIds = ids
+		.map((id) => checkout?.lines.find((line) => line?.variant.id == id)?.id)
+		.filter((id) => id != null);
+	// console.log('lineIds', lineIds)
+	return lineIds;
 };
 
 export default async function Page({ params }: { params: { channel: string } }) {
@@ -125,9 +127,7 @@ export default async function Page({ params }: { params: { channel: string } }) 
 										<DeleteLineButton
 											checkoutId={checkoutId}
 											lineId={item.id}
-											subLineIds={getSubLinesByMainVariantId(checkout, item.variant.id).map(
-												(line) => line.id,
-											)}
+											subLineIds={getSubLineIdsByMainVariant(checkout, item)}
 										/>
 									</div>
 								</div>
