@@ -211,7 +211,7 @@ const INITIAL_FORM = {
 };
 
 const GlassesStepFormDialog = forwardRef(
-	({ channel, variant, product, submitText = "Confirm", onSubmit }, ref) => {
+	({ channel, variant, product, submitText = "Confirm", onSubmit, onClose }, ref) => {
 		const visionFormRef = useRef(null);
 
 		const [vis, setVis] = useState(false);
@@ -273,6 +273,7 @@ const GlassesStepFormDialog = forwardRef(
 		};
 		const close = () => {
 			setVis(false);
+			onClose?.();
 		};
 		const reset = () => {
 			setForm(INITIAL_FORM);

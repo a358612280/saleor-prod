@@ -31,7 +31,16 @@ function GlassesStepFormContainer() {
 		onSubmit: null,
 	});
 	const [vis, setVis] = useState(false);
-	const canMount = useMemo(() => data.channel && data.product && data.variant, [data]);
+	const canMount = useMemo(
+		() => data.channel != null && data.product != null && data.variant != null,
+		[data],
+	);
+
+	useEffect(() => {
+		if (vis && canMount) {
+			dialogRef.current?.open();
+		}
+	}, [vis, canMount]);
 
 	useEffect(() => {
 		if (_MANAGER.$instance != null) {
@@ -88,6 +97,11 @@ function GlassesStepFormContainer() {
 							setVis(false);
 							dialogRef.current?.reset();
 						}
+					}}
+					onClose={() => {
+						// reset
+						setVis(false);
+						dialogRef.current?.reset();
 					}}
 				/>
 			)}
